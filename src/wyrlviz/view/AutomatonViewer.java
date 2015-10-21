@@ -1,47 +1,49 @@
-import java.io.FileReader;
-import java.io.IOException;
+package wyrlviz.view;
+
 import java.util.HashSet;
 
-import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import com.mxgraph.layout.mxCompactTreeLayout;
-import com.mxgraph.layout.mxFastOrganicLayout;
-import com.mxgraph.layout.mxOrganicLayout;
+import com.mxgraph.layout.mxIGraphLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 
 import wyautl.core.Automaton;
 import wyautl.core.Schema;
-import wyautl.io.PrettyAutomataReader;
 import wyrl.util.Pair;
-import wyrw.core.*;
-import wyrw.util.AbstractActivation;
 
-public class WyrlViz extends JFrame
-{
-
+public class AutomatonViewer extends JPanel {
 	/**
-	 * 
+	 * The graph object used to represent the automaton
 	 */
-	private static final long serialVersionUID = -2707712944901661771L;
-
-	/**
-	 * The schema for the rewrite system we're visualising
-	 */
-	private Schema schema;
+	private final mxGraph graph;
 	
-	public WyrlViz(Schema schema)
-	{
-		super("WyRL Viewer");
-
+	/**
+	 * The algorithm used to layout the automaton
+	 */
+	private final mxIGraphLayout layout;
+	
+	/**
+	 * The schema used for the class of automata being displayed
+	 */
+	private final Schema schema;
+	
+	public AutomatonViewer(Schema schema) {
 		this.schema = schema;
-		
+		this.graph = new mxGraph();
+		this.layout = new mxCompactTreeLayout(graph,false);
+		mxGraphComponent graphComponent = new mxGraphComponent(graph);
+		add(graphComponent);				
 	}
-
+	
+	/**
+	 * Set the automaton which is to be drawn in the view. An effort is made 
+	 * 
+	 * @param automaton
+	 */
 	public void draw(Automaton automaton) {
-		mxGraph graph = new mxGraph();
 		Object parent = graph.getDefaultParent();
-
 		graph.getModel().beginUpdate();
 		try
 		{
@@ -93,12 +95,12 @@ public class WyrlViz extends JFrame
 
 		mxGraphComponent graphComponent = new mxGraphComponent(graph);
 		//mxFastOrganicLayout layoutifier = new mxFastOrganicLayout(graph);
-		mxCompactTreeLayout layoutifier = new mxCompactTreeLayout(graph,false);
+		//mxCompactTreeLayout layoutifier = new mxCompactTreeLayout(graph,false);
 		//mxOrganicLayout layoutifier = new mxOrganicLayout(graph);
-	    layoutifier.execute(parent);
-		getContentPane().add(graphComponent);
+	    //layoutifier.execute(parent);
 	}
 	
+
 	public static Pair<Integer,boolean[]> getVisibleStates(Automaton automaton) {
 		HashSet<Integer> visited = new HashSet<Integer>();
 		int min = 0;
@@ -129,44 +131,4 @@ public class WyrlViz extends JFrame
 		}
 		return new Pair<Integer,boolean[]>(-min,visible);
 	}
-	
-	public static Automaton readAutomaton(String filename) throws Exception {
-		FileReader fr = new FileReader(filename);
-		PrettyAutomataReader reader = new PrettyAutomataReader(fr, Logic.SCHEMA);
-		Automaton automaton = reader.read();
-		fr.close();
-		return automaton;
-	}
-	
-	public static void main(String[] args) throws Exception
-	{
-		// First, load the automaton
-		Automaton automaton = readAutomaton("test.aut");
-		
-		// Second, construct the viewer
-		WyrlViz frame = new WyrlViz(Logic.SCHEMA);		
-
-		
-		// Finally, do the animation
-		Reduction rewrite = new Reduction(Logic.SCHEMA,AbstractActivation.RANK_COMPARATOR,Logic.reductions);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(400, 320);
-		frame.setVisible(true);
-		frame.draw(automaton);
-		frame.repaint();
-		frame.revalidate();
-				
-		int HEAD = rewrite.initialise(automaton);
-		int next;
-		while((next = rewrite.states().get(HEAD).select()) != -1) {
-			try { Thread.sleep(1000); } catch(InterruptedException e) {};			
-			HEAD = rewrite.step(HEAD, next);
-			Rewrite.State state = rewrite.states().get(HEAD);
-			frame.getContentPane().removeAll();
-			frame.draw(state.automaton());	
-			frame.repaint();
-			frame.revalidate();				
-		} 
-	}
-
 }

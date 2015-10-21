@@ -2,8 +2,8 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Users/djp/pkg/jgraphx-3.4.0.1/lib/jgraphx.jar"/>
-	<classpathentry kind="lib" path="/Users/djp/projects/WyrlVis/lib/wybs-v0.3.34.jar"/>
-	<classpathentry kind="lib" path="/Users/djp/projects/WyrlVis/lib/wyrl-v0.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/wybs-v0.3.34.jar"/>
+	<classpathentry kind="lib" path="lib/wyrl-v0.4.1.jar"/>
+	<classpathentry kind="lib" path="lib/jgraphx-3.4.0.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
