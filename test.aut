@@ -1,1 +1,1 @@
-True
+And{Not(True),Var("X"),Not(Not(Not(Var("X"))))}

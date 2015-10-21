@@ -5,10 +5,10 @@ import wyautl.util.BigRational;
 import wyautl.io.*;
 import wyautl.core.*;
 import wyrw.core.*;
+import wyrw.util.AbstractRewriteRule;
 import wyrl.core.*;
 import wyrl.util.Runtime;
 import wyrl.util.Pair;
-import wyrl.util.AbstractRewriteRule;
 
 public final class Logic {
 	// term Var(^string)
@@ -37,15 +37,15 @@ public final class Logic {
 
 		public Reduction_0(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_Not) {
 				Automaton.Term t0 = (Automaton.Term) s0;
 				int r1 = t0.contents;
 				if(Runtime.accepts(type0,automaton,automaton.get(r1), SCHEMA)) {
 					int[] state = {r0, r1};
-					activations.add(new Activation(this,null,state));
+					activations.add(new Reduction.Activation(this,null,state));
 				}
 			}
 		}
@@ -81,8 +81,8 @@ public final class Logic {
 
 		public Reduction_1(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_Not) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -92,7 +92,7 @@ public final class Logic {
 					Automaton.Term t1 = (Automaton.Term) s1;
 					int r2 = t1.contents;
 					int[] state = {r0, r1, r2};
-					activations.add(new Activation(this,null,state));
+					activations.add(new Reduction.Activation(this,null,state));
 				}
 			}
 		}
@@ -116,8 +116,8 @@ public final class Logic {
 
 		public Reduction_2(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_Not) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -129,7 +129,7 @@ public final class Logic {
 					Automaton.State s2 = automaton.get(r2);
 					Automaton.Collection c2 = (Automaton.Collection) s2;
 					int[] state = {r0, r1, r2, 0};
-					activations.add(new Activation(this,null,state));
+					activations.add(new Reduction.Activation(this,null,state));
 				}
 			}
 		}
@@ -169,8 +169,8 @@ public final class Logic {
 
 		public Reduction_3(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_Not) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -182,7 +182,7 @@ public final class Logic {
 					Automaton.State s2 = automaton.get(r2);
 					Automaton.Collection c2 = (Automaton.Collection) s2;
 					int[] state = {r0, r1, r2, 0};
-					activations.add(new Activation(this,null,state));
+					activations.add(new Reduction.Activation(this,null,state));
 				}
 			}
 		}
@@ -233,8 +233,8 @@ public final class Logic {
 
 		public Reduction_4(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_And) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -245,7 +245,7 @@ public final class Logic {
 					for(int r3=0;r3!=c1.size();++r3) {
 						int r2 = c1.get(r3);
 						int[] state = {r0, r1, r2, r3};
-						activations.add(new Activation(this,null,state));
+						activations.add(new Reduction.Activation(this,null,state));
 					}
 				}
 			}
@@ -271,8 +271,8 @@ public final class Logic {
 
 		public Reduction_5(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_And) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -284,7 +284,7 @@ public final class Logic {
 						int r2 = c1.get(r3);
 						if(Runtime.accepts(type0,automaton,automaton.get(r2), SCHEMA)) {
 							int[] state = {r0, r1, r2, r3, 0};
-							activations.add(new Activation(this,null,state));
+							activations.add(new Reduction.Activation(this,null,state));
 						}
 					}
 				}
@@ -341,8 +341,8 @@ public final class Logic {
 
 		public Reduction_6(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_And) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -359,7 +359,7 @@ public final class Logic {
 							Automaton.State s4 = automaton.get(r4);
 							Automaton.Collection c4 = (Automaton.Collection) s4;
 							int[] state = {r0, r1, r2, r3, r4, 0, 0};
-							activations.add(new Activation(this,null,state));
+							activations.add(new Reduction.Activation(this,null,state));
 						}
 					}
 				}
@@ -402,8 +402,8 @@ public final class Logic {
 
 		public Reduction_7(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_And) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -421,7 +421,7 @@ public final class Logic {
 								if(r6 == r3) { continue; }
 								int r5 = c1.get(r6);
 								int[] state = {r0, r1, r2, r3, r4, r5, r6, 0};
-								activations.add(new Activation(this,null,state));
+								activations.add(new Reduction.Activation(this,null,state));
 							}
 						}
 					}
@@ -463,8 +463,8 @@ public final class Logic {
 
 		public Reduction_8(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_And) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -481,7 +481,7 @@ public final class Logic {
 							Automaton.State s4 = automaton.get(r4);
 							Automaton.Collection c4 = (Automaton.Collection) s4;
 							int[] state = {r0, r1, r2, r3, r4, 0, 0};
-							activations.add(new Activation(this,null,state));
+							activations.add(new Reduction.Activation(this,null,state));
 						}
 					}
 				}
@@ -544,8 +544,8 @@ public final class Logic {
 
 		public Reduction_9(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_Or) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -556,7 +556,7 @@ public final class Logic {
 					for(int r3=0;r3!=c1.size();++r3) {
 						int r2 = c1.get(r3);
 						int[] state = {r0, r1, r2, r3};
-						activations.add(new Activation(this,null,state));
+						activations.add(new Reduction.Activation(this,null,state));
 					}
 				}
 			}
@@ -582,8 +582,8 @@ public final class Logic {
 
 		public Reduction_10(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_Or) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -595,7 +595,7 @@ public final class Logic {
 						int r2 = c1.get(r3);
 						if(Runtime.accepts(type0,automaton,automaton.get(r2), SCHEMA)) {
 							int[] state = {r0, r1, r2, r3, 0};
-							activations.add(new Activation(this,null,state));
+							activations.add(new Reduction.Activation(this,null,state));
 						}
 					}
 				}
@@ -652,8 +652,8 @@ public final class Logic {
 
 		public Reduction_11(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_Or) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -671,7 +671,7 @@ public final class Logic {
 								if(r6 == r3) { continue; }
 								int r5 = c1.get(r6);
 								int[] state = {r0, r1, r2, r3, r4, r5, r6, 0};
-								activations.add(new Activation(this,null,state));
+								activations.add(new Reduction.Activation(this,null,state));
 							}
 						}
 					}
@@ -713,8 +713,8 @@ public final class Logic {
 
 		public Reduction_12(Pattern.Term pattern) { super(pattern); }
 
-		public final void probe(Automaton automaton, int root, List<Activation> activations) {
-			int r0 = root;
+		public final void probe(Automaton automaton, int target, List<Reduction.Activation> activations) {
+			int r0 = target;
 			Automaton.State s0 = automaton.get(r0);
 			if(s0.kind == K_Or) {
 				Automaton.Term t0 = (Automaton.Term) s0;
@@ -731,7 +731,7 @@ public final class Logic {
 							Automaton.State s4 = automaton.get(r4);
 							Automaton.Collection c4 = (Automaton.Collection) s4;
 							int[] state = {r0, r1, r2, r3, r4, 0, 0};
-							activations.add(new Activation(this,null,state));
+							activations.add(new Reduction.Activation(this,null,state));
 						}
 					}
 				}
