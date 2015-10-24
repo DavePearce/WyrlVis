@@ -1,5 +1,6 @@
 package wyrlviz.view;
 
+import java.awt.Dimension;
 import java.util.HashSet;
 
 import javax.swing.JPanel;
@@ -34,7 +35,7 @@ public class AutomatonViewer extends JPanel {
 		this.graph = new mxGraph();
 		this.layout = new mxCompactTreeLayout(graph,false);
 		mxGraphComponent graphComponent = new mxGraphComponent(graph);
-		add(graphComponent);				
+		add(graphComponent);					
 	}
 	
 	/**
@@ -45,6 +46,7 @@ public class AutomatonViewer extends JPanel {
 	public void draw(Automaton automaton) {
 		Object parent = graph.getDefaultParent();
 		graph.getModel().beginUpdate();
+		graph.removeCells();
 		try
 		{
 			// First, add all the nodes
@@ -93,11 +95,10 @@ public class AutomatonViewer extends JPanel {
 			graph.getModel().endUpdate();
 		}
 
-		mxGraphComponent graphComponent = new mxGraphComponent(graph);
 		//mxFastOrganicLayout layoutifier = new mxFastOrganicLayout(graph);
-		//mxCompactTreeLayout layoutifier = new mxCompactTreeLayout(graph,false);
+		mxCompactTreeLayout layoutifier = new mxCompactTreeLayout(graph,false);
 		//mxOrganicLayout layoutifier = new mxOrganicLayout(graph);
-	    //layoutifier.execute(parent);
+	    layoutifier.execute(parent);
 	}
 	
 
