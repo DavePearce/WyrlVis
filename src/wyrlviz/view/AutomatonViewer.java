@@ -1,13 +1,20 @@
 package wyrlviz.view;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.HashSet;
 
 import javax.swing.JPanel;
-
 import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.layout.mxIGraphLayout;
 import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxPoint;
+import com.mxgraph.util.mxRectangle;
 import com.mxgraph.view.mxGraph;
 
 import wyautl.core.Automaton;
@@ -15,6 +22,10 @@ import wyautl.core.Schema;
 import wyrl.util.Pair;
 
 public class AutomatonViewer extends JPanel {
+	private static final String CONSTANT_STYLE = "#e3daab";
+	private static final String SET_STYLE = "#9edbe1";
+	private static final String LIST_STYLE = "#8ac4c9";
+	private static final String TERM_STYLE = "#9acb8d";
 	/**
 	 * The graph object used to represent the automaton
 	 */
@@ -40,7 +51,21 @@ public class AutomatonViewer extends JPanel {
 		this.graph = new mxGraph();
 		this.layout = new mxCompactTreeLayout(graph,false);
 		this.graphComponent = new mxGraphComponent(graph);
-		add(graphComponent);					
+		add(graphComponent);
+		// Intercept resize events
+		this.addComponentListener(new ComponentListener() {
+
+    		public void componentResized(ComponentEvent e) {
+    			updateInternalDimensions();
+    		}
+
+    		public void componentHidden(ComponentEvent e) {}
+
+    		public void componentMoved(ComponentEvent e) {}
+
+    		public void componentShown(ComponentEvent e) {}
+    	});
+
 	}
 	
 	/**
@@ -51,8 +76,7 @@ public class AutomatonViewer extends JPanel {
 	public void draw(Automaton automaton) {
 		// THIS IS UGLY
 		graph = new mxGraph();
-		graphComponent.setGraph(graph);
-		graphComponent.setPreferredSize(this.getSize());		
+		graphComponent.setGraph(graph);	
 		Object parent = graph.getDefaultParent();
 		graph.getModel().beginUpdate();
 		graph.removeCells();
@@ -68,17 +92,23 @@ public class AutomatonViewer extends JPanel {
 				if(vs) {
 					Automaton.State state = automaton.get(i-zeroth);
 					String text;
+					String style;
 					if(state instanceof Automaton.Constant) {
 						Automaton.Constant c = (Automaton.Constant) state;
 						text = c.toString();
+						style = CONSTANT_STYLE;
 					} else if(state instanceof Automaton.Set) {
 						text = "{}";
+						style = SET_STYLE;
 					} else if(state instanceof Automaton.List) {
 						text = "[]";
+						style = LIST_STYLE;
 					} else {
-						text = schema.get(state.kind).name;	
+						text = schema.get(state.kind).name;
+						style = TERM_STYLE;
 					}	
 					nodes[i] = graph.insertVertex(parent, null, text, 20, 20, 40, 30, "ROUNDED");
+					graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, style, new Object[]{nodes[i]});
 				}
 			}			
 			// Second, add all the children edges
@@ -104,10 +134,13 @@ public class AutomatonViewer extends JPanel {
 			graph.getModel().endUpdate();
 		}
 
-		//mxFastOrganicLayout layoutifier = new mxFastOrganicLayout(graph);
 		mxCompactTreeLayout layoutifier = new mxCompactTreeLayout(graph,false);
-		//mxOrganicLayout layoutifier = new mxOrganicLayout(graph);
 	    layoutifier.execute(parent);
+	    mxRectangle r = graph.getView().getGraphBounds();
+	    System.out.println("WIDTH: " + r.getWidth());
+	    int xoff = graphComponent.getWidth()/2 - ((int)r.getWidth()/2);
+	    mxPoint p = new mxPoint(-xoff,100);
+	    graph.getView().setTranslate(p);
 	}
 	
 
@@ -140,5 +173,14 @@ public class AutomatonViewer extends JPanel {
 			visible[i-min] = visited.contains(i);
 		}
 		return new Pair<Integer,boolean[]>(-min,visible);
+	}
+	
+	private void updateInternalDimensions() {
+		Insets insets = this.getInsets();
+		
+		int width = getWidth() - (insets.left + insets.right);
+		int height = getHeight() - (insets.top + insets.bottom);
+		Dimension dim = new Dimension(width,height);
+		graphComponent.setPreferredSize(dim);
 	}
 }

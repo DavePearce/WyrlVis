@@ -1,6 +1,7 @@
 package wyrlviz;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -25,6 +27,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
 
 import com.mxgraph.view.mxGraph;
 
@@ -34,6 +37,7 @@ import wyautl.io.PrettyAutomataReader;
 import wyrl.util.Pair;
 import wyrlviz.view.AutomatonViewer;
 import wyrlviz.view.HistoryViewer;
+import wyrlviz.view.NavigableReduction;
 import wyrw.core.*;
 import wyrw.util.AbstractActivation;
 
@@ -44,6 +48,8 @@ public class Main extends JFrame {
 	 */
 	private static final long serialVersionUID = -2707712944901661771L;
 
+	private static final Color ACTIVATION_VISITED_COL = new Color(255,0,0);
+	
 	/**
 	 * Responsible for displaying the automaton
 	 */
@@ -82,47 +88,32 @@ public class Main extends JFrame {
 	 */
 	private Schema schema;
 	
-	private Reduction rewrite;
-	
-	/**
-	 * Current history of states visited in the order they are visited
-	 */
-	private ArrayList<Integer> history = new ArrayList<Integer>();
-	
-	/**
-	 * Current position within the rewrite history
-	 */
-	private int hIndex;
+	private NavigableReduction rewrite;
 	
 	public Main(Schema schema, ReductionRule[] reductions)
 	{
 		super("WyRL Viewer");
-		this.rewrite = new Reduction(schema,AbstractActivation.RANK_COMPARATOR,reductions);
+		this.rewrite = new NavigableReduction(schema,AbstractActivation.RANK_COMPARATOR,reductions);
 		this.schema = schema;
 		this.menubar = createMenuBar();
 				
-		this.view = new AutomatonViewer(schema);
-		//view.setPreferredSize(new Dimension(300,390));
+		this.view = createAutomatonViewer();
 		this.activationPanel = createActivationPanel();
 		this.navigationPanel = createNavigationPanel();
 		this.mainPanel = createMainPanel();
 		this.mainPanel.add(view,BorderLayout.CENTER);
 		this.mainPanel.add(navigationPanel,BorderLayout.NORTH);
-		this.mainPanel.add(activationPanel,BorderLayout.EAST);
+		this.mainPanel.add(activationPanel,BorderLayout.SOUTH);
 		setJMenuBar(menubar);
 		getContentPane().add(mainPanel);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
-		setMinimumSize(new Dimension(400,400));
+		setMinimumSize(new Dimension(600,600));
 		pack();
 		setVisible(true);		
 	}
 	
 	public void initialise(Automaton automaton) {
-		// Finally, do the animation
-		int HEAD = rewrite.initialise(automaton);
-		history.clear();
-		history.add(HEAD);		
-		hIndex = 0;
+		rewrite.initialise(automaton);
 		reset();
 	}
 	
@@ -133,17 +124,7 @@ public class Main extends JFrame {
 	 * @param delta
 	 */
 	public void jump(int delta) {
-		int index = hIndex + delta;
-		index = Math.max(0, index);		
-		// First, check whether need to extend history or not
-		if(index >= history.size()) {
-			while(index >= history.size() && extendHistory()) {
-				hIndex = hIndex + 1;
-			}
-		} else {
-			hIndex = index;
-		}
-		// Second, check whether there actually is more history now
+		rewrite.jump(delta);
 		reset();
 	}
 	
@@ -176,9 +157,7 @@ public class Main extends JFrame {
 	 * @param activation
 	 */
 	public void apply(int activation) {
-		if(extendHistory(activation)) {
-			hIndex = history.size() - 1;
-		} 
+		rewrite.extend(activation);		
 		reset();
 	}
 	
@@ -189,55 +168,21 @@ public class Main extends JFrame {
 	}
 	
 	private void reset() {
-		int HEAD = history.get(hIndex);
-		Rewrite.State state = rewrite.states().get(HEAD);
+		Rewrite.State state = rewrite.headState();
 		draw(state.automaton());
-		if(hView != null) { hView.update(history.get(hIndex)); }
+		if(hView != null) { hView.update(rewrite.head()); }
 		showActivations(state);
-		if(hIndex > 0) {
-			back.setEnabled(true);
-			first.setEnabled(true);
-		} else if(hIndex == 0) {
-			first.setEnabled(false);
+		if(rewrite.atFront()) {
 			back.setEnabled(false);
+			first.setEnabled(false);
+		} else {
+			first.setEnabled(true);
+			back.setEnabled(true);
 		}
-		status.setText(Integer.toString(HEAD));
+		status.setText(Integer.toString(rewrite.head()));
 	}
 	
-	private boolean extendHistory() {
-		int HEAD = history.get(hIndex);				
-		int activation = rewrite.states().get(HEAD).select();
-		return extendHistory(activation);
-	}
-	private boolean extendHistory(int activation) {
-		int HEAD = history.get(hIndex);
-		if(activation != -1) {
-			Rewrite.State state = rewrite.states().get(HEAD);
-			Rewrite.Step step = state.step(activation);
-			int nHEAD;
-			if(step != null) {
-				// Activation previously taken
-				nHEAD = step.after();
-			} else {
-				// Not previouslu taken
-				nHEAD = rewrite.step(HEAD, activation);
-				
-			}
-			if(nHEAD != HEAD) {			
-				clearHistoryFrom(hIndex+1);
-				history.add(nHEAD);
-				return true;
-			}
-		}
-		return false;
-	}
 
-	private void clearHistoryFrom(int index) {
-		while(history.size() > index) {
-			history.remove(history.size()-1);
-		}
-	}
-	
 	private void showActivations(Rewrite.State state) {
 		activationPanel.removeAll();		
 		for(int i=0;i!=state.size();++i) {
@@ -281,7 +226,9 @@ public class Main extends JFrame {
 		// If the this activation has been previously taken, include the
 		// destination state in the name.
 		if(step != null) {
-			text = text + " => #" + step.after();
+			text = Integer.toString(step.after());
+		} else {
+			text = "?";
 		}
 		// Create the activation trigger
 		JButton trigger = new JButton(new AbstractAction(text) {
@@ -290,14 +237,23 @@ public class Main extends JFrame {
 				apply(activation);
 			}
 		});
+		trigger.setPreferredSize(new Dimension(40,40));
 		// If this activation is to the same state, then disable it
 		if(step != null && step.after() == step.before()) {
 			trigger.setEnabled(false);
+		} else if(step != null) {
+			trigger.setForeground(ACTIVATION_VISITED_COL);
 		}
-		GridBagConstraints g = new GridBagConstraints();
-		g.gridx = 0;
-		g.gridy = activation+1;		
-		activationPanel.add(trigger,g);		
+		activationPanel.add(trigger);		
+	}
+	
+	private AutomatonViewer createAutomatonViewer() {
+		AutomatonViewer v = new AutomatonViewer(schema);
+		Border border = BorderFactory.createCompoundBorder(BorderFactory
+				.createEmptyBorder(3, 3, 3, 3), BorderFactory
+				.createLineBorder(Color.gray));
+		v.setBorder(border);
+		return v;
 	}
 	
 	private JPanel createMainPanel() {
@@ -318,7 +274,7 @@ public class Main extends JFrame {
 		panel.add(back);
 		panel.add(status);
 		panel.add(next);
-		panel.add(last);
+		panel.add(last);		
 		return panel;
 	}
 	
@@ -333,8 +289,8 @@ public class Main extends JFrame {
 	
 	private JPanel createActivationPanel() {
 		JPanel panel = new JPanel();
-		panel.setLayout(new GridBagLayout());
-		panel.setPreferredSize(new Dimension(200,panel.getHeight()));
+		panel.setLayout(new FlowLayout());
+		panel.setPreferredSize(new Dimension(600,100));
 		return panel;
 	}
 	
