@@ -18,7 +18,12 @@ public class AutomatonViewer extends JPanel {
 	/**
 	 * The graph object used to represent the automaton
 	 */
-	private final mxGraph graph;
+	private mxGraph graph;
+	
+	/**
+	 * The swing interface
+	 */
+	private mxGraphComponent graphComponent; 
 	
 	/**
 	 * The algorithm used to layout the automaton
@@ -34,7 +39,7 @@ public class AutomatonViewer extends JPanel {
 		this.schema = schema;
 		this.graph = new mxGraph();
 		this.layout = new mxCompactTreeLayout(graph,false);
-		mxGraphComponent graphComponent = new mxGraphComponent(graph);
+		this.graphComponent = new mxGraphComponent(graph);
 		add(graphComponent);					
 	}
 	
@@ -44,6 +49,10 @@ public class AutomatonViewer extends JPanel {
 	 * @param automaton
 	 */
 	public void draw(Automaton automaton) {
+		// THIS IS UGLY
+		graph = new mxGraph();
+		graphComponent.setGraph(graph);
+		graphComponent.setPreferredSize(this.getSize());		
 		Object parent = graph.getDefaultParent();
 		graph.getModel().beginUpdate();
 		graph.removeCells();
