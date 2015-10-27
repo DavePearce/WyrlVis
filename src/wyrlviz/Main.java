@@ -138,6 +138,7 @@ public class Main extends JFrame {
 			exit();
 		case "Show History":
 			hView = new HistoryViewer(rewrite);
+			hView.update(rewrite.head());
 			break;
 		default:
 			throw new RuntimeException("Unknown menu item selected");
@@ -222,7 +223,8 @@ public class Main extends JFrame {
 	
 	private void addActivationTrigger(final int activation, Rewrite.State state) {
 		Rewrite.Step step = state.step(activation);
-		String text = state.activation(activation).rule().name();
+		String text;
+		String hoverText = state.activation(activation).rule().name(); 
 		// If the this activation has been previously taken, include the
 		// destination state in the name.
 		if(step != null) {
@@ -244,6 +246,7 @@ public class Main extends JFrame {
 		} else if(step != null) {
 			trigger.setForeground(ACTIVATION_VISITED_COL);
 		}
+		trigger.setToolTipText(hoverText);
 		activationPanel.add(trigger);		
 	}
 	

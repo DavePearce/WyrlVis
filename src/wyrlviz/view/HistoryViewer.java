@@ -36,6 +36,12 @@ public class HistoryViewer extends JFrame {
 	 */
 	private final ArrayList<Object> vertices = new ArrayList<Object>();
 	
+	/**
+	 * The set of all vertices currently being displayed
+	 */
+	private final ArrayList<Object> edges = new ArrayList<Object>();
+	
+	
 	public HistoryViewer(Rewrite rewrite) {
 		this.rewrite = rewrite;
 		this.graph = new mxGraph();
@@ -66,21 +72,23 @@ public class HistoryViewer extends JFrame {
 	}
 
 	private void addMissingEdges(Object parent, int oldSize) {
-		for(Rewrite.Step step : rewrite.steps()) {
-			if(step.before() >= oldSize || step.after() >= oldSize) {
-				graph.insertEdge(parent, null, "", vertices.get(step.before()),vertices.get(step.after()));
+		int index = edges.size();
+		while (index < rewrite.steps().size()) {
+			Rewrite.Step step = rewrite.steps().get(index++);
+			if(step.before() != step.after()) {
+				edges.add(graph.insertEdge(parent, null, "", vertices.get(step.before()), vertices.get(step.after())));
+			} else {
+				edges.add(null); // dummy
 			}
 		}
 	}
 
-	private int addMissingVertices(Object parent) {
-		int oldSize = vertices.size();
-		int index = oldSize;
-		while(vertices.size() < rewrite.states().size()) {	
+	private void addMissingVertices(Object parent) {
+		int index = vertices.size();
+		while(index < rewrite.states().size()) {	
 			String label = Integer.toString(index++);
 			vertices.add(graph.insertVertex(parent, null, label, 20, 20, 20, 20, "ROUNDED"));
 		}
-		return oldSize;
 	}
 
 	private void highlightCell(int active) {

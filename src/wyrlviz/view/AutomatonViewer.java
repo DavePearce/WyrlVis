@@ -136,10 +136,11 @@ public class AutomatonViewer extends JPanel {
 
 		mxCompactTreeLayout layoutifier = new mxCompactTreeLayout(graph,false);
 	    layoutifier.execute(parent);
+	    // Center image
 	    mxRectangle r = graph.getView().getGraphBounds();
-	    System.out.println("WIDTH: " + r.getWidth());
-	    int xoff = graphComponent.getWidth()/2 - ((int)r.getWidth()/2);
-	    mxPoint p = new mxPoint(-xoff,100);
+	    int xoff = this.getWidth()/2 - ((int)r.getWidth()/2);
+	    int yoff = this.getHeight()/2 - ((int)r.getHeight()/2);
+	    mxPoint p = new mxPoint(xoff,yoff);
 	    graph.getView().setTranslate(p);
 	}
 	
@@ -182,5 +183,11 @@ public class AutomatonViewer extends JPanel {
 		int height = getHeight() - (insets.top + insets.bottom);
 		Dimension dim = new Dimension(width,height);
 		graphComponent.setPreferredSize(dim);
+	    mxRectangle r = graph.getView().getGraphBounds();
+	    int xoff = this.getWidth()/2 - ((int)r.getWidth()/2);
+	    int yoff = this.getHeight()/2 - ((int)r.getHeight()/2);
+	    mxPoint p = new mxPoint(xoff,yoff);
+	    graph.getView().setTranslate(p);
+
 	}
 }

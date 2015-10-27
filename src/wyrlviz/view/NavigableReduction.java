@@ -27,6 +27,7 @@ public class NavigableReduction extends Reduction {
 	}
 
 	public int initialise(Automaton automaton) {
+		super.states.clear();
 		int HEAD = super.initialise(automaton);
 		history.clear();
 		history.add(HEAD);		
@@ -59,7 +60,7 @@ public class NavigableReduction extends Reduction {
 		// First, check whether need to extend history or not
 		if(index >= history.size()) {
 			while(index >= history.size() && extend()) {
-				hIndex = hIndex + 1;
+				//hIndex = hIndex + 1;
 			}
 		} else {
 			hIndex = index;
@@ -82,9 +83,8 @@ public class NavigableReduction extends Reduction {
 				// Activation previously taken
 				nHEAD = step.after();
 			} else {
-				// Not previouslu taken
-				nHEAD = step(HEAD, activation);
-				
+				// Not previously taken
+				nHEAD = step(HEAD, activation);				
 			}
 			if(nHEAD != HEAD) {			
 				clearHistoryFrom(++hIndex);
