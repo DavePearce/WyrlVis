@@ -42,6 +42,7 @@ import wyrlviz.view.AutomatonViewer;
 import wyrlviz.view.HistoryViewer;
 import wyrlviz.view.NavigableReduction;
 import wyrw.core.*;
+import wyrw.core.Inference.Activation;
 import wyrw.util.AbstractActivation;
 
 public class Main extends JFrame {
@@ -272,24 +273,37 @@ public class Main extends JFrame {
 			trigger.setForeground(ACTIVATION_VISITED_COL);
 		}
 		trigger.setToolTipText(hoverText);
-		addStateHighlighter(trigger,state.activation(activation));		
+		addStateHighlighter(trigger,state.automaton(),state.activation(activation));		
 		activationPanel.add(trigger);		
 	}
 	
-	private void addStateHighlighter(JButton trigger, final Rewrite.Activation activation) {
+	private void addStateHighlighter(JButton trigger, final Automaton automaton, final Rewrite.Activation activation) {
 		trigger.addMouseListener(new java.awt.event.MouseAdapter() {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				view.setHighlight(true,activation.binding());
+				view.setHighlight(true,filterBinding(automaton,activation));
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				view.setHighlight(false,activation.binding());
+				view.setHighlight(false,filterBinding(automaton,activation));
 			}
 			
 		});
+	}
+	
+	/**
+	 * This basically attempts to filter out things in the activations binding
+	 * state which are not variables.
+	 * 
+	 * @param automaton
+	 * @param activation
+	 * @return
+	 */
+	private int[] filterBinding(Automaton automaton, Rewrite.Activation activation) {
+		// +1 here because there is always a root variable which is not declared
+		return Arrays.copyOf(activation.binding(),activation.rule().pattern().declarations().size()+1);		
 	}
 	
 	private AutomatonViewer createAutomatonViewer() {
