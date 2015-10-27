@@ -5,5 +5,6 @@
 	<classpathentry kind="lib" path="lib/wybs-v0.3.34.jar"/>
 	<classpathentry kind="lib" path="lib/wyrl-v0.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/jgraphx-3.4.0.1.jar"/>
+	<classpathentry kind="lib" path="examples"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

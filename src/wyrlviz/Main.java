@@ -8,6 +8,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileReader;
@@ -90,13 +92,10 @@ public class Main extends JFrame {
 	
 	private NavigableReduction rewrite;
 	
-	public Main(Schema schema, ReductionRule[] reductions)
+	public Main()
 	{
 		super("WyRL Viewer");
-		this.rewrite = new NavigableReduction(schema,AbstractActivation.RANK_COMPARATOR,reductions);
-		this.schema = schema;
-		this.menubar = createMenuBar();
-				
+		this.menubar = createMenuBar();				
 		this.view = createAutomatonViewer();
 		this.activationPanel = createActivationPanel();
 		this.navigationPanel = createNavigationPanel();
@@ -117,6 +116,19 @@ public class Main extends JFrame {
 		reset();
 	}
 	
+	public void initialise(File ruleset) {
+		try {
+			// FIXME: the mechanism for selecting the rule set needs to be fixed
+			Class ruleSet = Class.forName(ruleset.getName().replace(".class", ""));
+			schema = (Schema) ruleSet.getField("SCHEMA").get(null);
+			ReductionRule[] reductions = (ReductionRule[]) ruleSet.getField("reductions").get(null);
+			InferenceRule[] inferences = (InferenceRule[]) ruleSet.getField("inferences").get(null);
+			rewrite = new NavigableReduction(schema,AbstractActivation.RANK_COMPARATOR,reductions);
+		} catch(Exception e) {
+			e.printStackTrace(System.err);
+		}
+	}
+	
 	/**
 	 * Jump to a relative position in the history. For example, +1 means advance
 	 * 1 point.  If the delta is part the end of the history then we stop there.
@@ -130,10 +142,25 @@ public class Main extends JFrame {
 	
 	public void menuSelected(String s) throws Exception {
 		switch(s) {
-		case "Open":
-			openFile();
-			closeViews();			
+		case "New": {
+			File file = openFile();
+			if(file != null) {
+				// load file into rewrite viewer
+				initialise(file);
+				initialise(new Automaton());
+				closeViews();
+			}			
 			break;
+		}
+		case "Open": {
+			File file = openFile();
+			if(file != null) {
+				// load file into rewrite viewer
+				initialise(readAutomaton(file,schema));
+				closeViews();
+			}
+			break;
+		}
 		case "Exit":
 			exit();
 		case "Show History":
@@ -163,7 +190,7 @@ public class Main extends JFrame {
 	}
 	
 	public void draw(Automaton automaton) {
-		view.draw(automaton);
+		view.draw(automaton,schema);
 		view.repaint();
 		view.revalidate();		
 	}
@@ -193,17 +220,14 @@ public class Main extends JFrame {
 		this.repaint();
 	}
 	
-	public void openFile() throws Exception {
+	public File openFile() throws Exception {
 		JFileChooser fileChooser = new JFileChooser(new File("."));
-		File file;
 		if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			file = fileChooser.getSelectedFile();
+			return fileChooser.getSelectedFile();
 		} else {
 			// user cancelled open after all
-			return;
-		}
-		// load file into rewrite viewer
-		initialise(readAutomaton(file,schema));
+			return null;
+		}		
 	}
 
 	public void exit() {
@@ -224,7 +248,7 @@ public class Main extends JFrame {
 	private void addActivationTrigger(final int activation, Rewrite.State state) {
 		Rewrite.Step step = state.step(activation);
 		String text;
-		String hoverText = state.activation(activation).rule().name(); 
+		final String hoverText = state.activation(activation).rule().name(); 
 		// If the this activation has been previously taken, include the
 		// destination state in the name.
 		if(step != null) {
@@ -247,11 +271,28 @@ public class Main extends JFrame {
 			trigger.setForeground(ACTIVATION_VISITED_COL);
 		}
 		trigger.setToolTipText(hoverText);
+		addStateHighlighter(trigger,state.activation(activation));		
 		activationPanel.add(trigger);		
 	}
 	
+	private void addStateHighlighter(JButton trigger, final Rewrite.Activation activation) {
+		trigger.addMouseListener(new java.awt.event.MouseAdapter() {
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				view.setHighlight(activation.target(),true);
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				view.setHighlight(activation.target(),false);
+			}
+			
+		});
+	}
+	
 	private AutomatonViewer createAutomatonViewer() {
-		AutomatonViewer v = new AutomatonViewer(schema);
+		AutomatonViewer v = new AutomatonViewer();
 		Border border = BorderFactory.createCompoundBorder(BorderFactory
 				.createEmptyBorder(3, 3, 3, 3), BorderFactory
 				.createLineBorder(Color.gray));
@@ -301,6 +342,7 @@ public class Main extends JFrame {
 		// This function builds the menu bar
 		JMenuBar menuBar = new JMenuBar();
 		JMenu fileMenu = new JMenu("File"); 
+		fileMenu.add(makeMenuItem("New"));
 		fileMenu.add(makeMenuItem("Open"));
 		fileMenu.addSeparator();
 		fileMenu.add(makeMenuItem("Exit"));
@@ -337,15 +379,9 @@ public class Main extends JFrame {
 	
 	public static void main(String[] args) throws Exception
 	{
-		// First, decode rule set
-		String ruleSetName = "Logic";//args[0];
-		Class ruleSet = Class.forName(ruleSetName);
-		Schema schema = (Schema) ruleSet.getField("SCHEMA").get(null);
-		ReductionRule[] reductions = (ReductionRule[]) ruleSet.getField("reductions").get(null);
-		InferenceRule[] inferenes = (InferenceRule[]) ruleSet.getField("inferences").get(null);
-		
-		// Second, construct the viewer
-		Main frame = new Main(schema, reductions);		
+		// First, construct the viewer
+		Main frame = new Main();
+		frame.initialise(new File("Logic.class"));
 	}
 
 }

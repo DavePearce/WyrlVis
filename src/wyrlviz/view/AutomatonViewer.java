@@ -26,6 +26,7 @@ public class AutomatonViewer extends JPanel {
 	private static final String SET_STYLE = "#9edbe1";
 	private static final String LIST_STYLE = "#8ac4c9";
 	private static final String TERM_STYLE = "#9acb8d";
+	private static final String HIGHLIGHT_STYLE = "#EEEEEE";
 	/**
 	 * The graph object used to represent the automaton
 	 */
@@ -41,13 +42,13 @@ public class AutomatonViewer extends JPanel {
 	 */
 	private final mxIGraphLayout layout;
 	
-	/**
-	 * The schema used for the class of automata being displayed
-	 */
-	private final Schema schema;
+	private Automaton automaton;
 	
-	public AutomatonViewer(Schema schema) {
-		this.schema = schema;
+	private int zeroth;
+	
+	private Object[] nodes;
+	
+	public AutomatonViewer() {
 		this.graph = new mxGraph();
 		this.layout = new mxCompactTreeLayout(graph,false);
 		this.graphComponent = new mxGraphComponent(graph);
@@ -68,13 +69,20 @@ public class AutomatonViewer extends JPanel {
 
 	}
 	
+	public void setHighlight(int state, boolean on) {
+		String style = getFillStyle(state,on); 
+		Object vertex = nodes[state+zeroth];
+		graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, style, new Object[]{vertex});
+	}
+	
 	/**
 	 * Set the automaton which is to be drawn in the view. An effort is made 
 	 * 
 	 * @param automaton
 	 */
-	public void draw(Automaton automaton) {
+	public void draw(Automaton aut, Schema schema) {
 		// THIS IS UGLY
+		automaton = aut;
 		graph = new mxGraph();
 		graphComponent.setGraph(graph);	
 		Object parent = graph.getDefaultParent();
@@ -84,9 +92,9 @@ public class AutomatonViewer extends JPanel {
 		{
 			// First, add all the nodes
 			Pair<Integer,boolean[]> p = getVisibleStates(automaton);
-			int zeroth = p.first();
+			zeroth = p.first();
 			boolean[] visibleStates = p.second();
-			Object[] nodes = new Object[visibleStates.length];			
+			nodes = new Object[visibleStates.length];			
 			for (int i = 0; i !=visibleStates.length; ++i) {
 				boolean vs = visibleStates[i];
 				if(vs) {
@@ -144,6 +152,20 @@ public class AutomatonViewer extends JPanel {
 	    graph.getView().setTranslate(p);
 	}
 	
+	public String getFillStyle(int stateID, boolean highlight) {
+		Automaton.State state = automaton.get(stateID);
+		if(highlight) {
+			return HIGHLIGHT_STYLE;
+		} else if(state instanceof Automaton.Constant) {
+			return CONSTANT_STYLE;
+		} else if(state instanceof Automaton.Set) {
+			return SET_STYLE;
+		} else if(state instanceof Automaton.List) {
+			return LIST_STYLE;
+		} else {
+			return TERM_STYLE;
+		}	
+	}
 
 	public static Pair<Integer,boolean[]> getVisibleStates(Automaton automaton) {
 		HashSet<Integer> visited = new HashSet<Integer>();
