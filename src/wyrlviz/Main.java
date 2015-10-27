@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 import javax.swing.AbstractAction;
@@ -280,12 +281,12 @@ public class Main extends JFrame {
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				view.setHighlight(activation.target(),true);
+				view.setHighlight(true,activation.binding());
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				view.setHighlight(activation.target(),false);
+				view.setHighlight(false,activation.binding());
 			}
 			
 		});

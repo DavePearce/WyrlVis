@@ -26,7 +26,8 @@ public class AutomatonViewer extends JPanel {
 	private static final String SET_STYLE = "#9edbe1";
 	private static final String LIST_STYLE = "#8ac4c9";
 	private static final String TERM_STYLE = "#9acb8d";
-	private static final String HIGHLIGHT_STYLE = "#EEEEEE";
+	private static final String HIGHLIGHT_STYLE = "#CCCCCC";
+	private static final String HIGHLIGHT_ROOT_STYLE = "#EEEEEE";
 	/**
 	 * The graph object used to represent the automaton
 	 */
@@ -69,10 +70,16 @@ public class AutomatonViewer extends JPanel {
 
 	}
 	
-	public void setHighlight(int state, boolean on) {
-		String style = getFillStyle(state,on); 
-		Object vertex = nodes[state+zeroth];
-		graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, style, new Object[]{vertex});
+	public void setHighlight(boolean on, int... states) {
+		for(int i = 0 ; i != states.length; ++i) {
+			int state = states[i];
+			String style = getFillStyle(state,on); 
+			if(on && i == 0) {
+				style = HIGHLIGHT_ROOT_STYLE;
+			} 
+			Object vertex = nodes[state+zeroth];
+			graph.setCellStyles(mxConstants.STYLE_FILLCOLOR, style, new Object[]{vertex});
+		}
 	}
 	
 	/**
